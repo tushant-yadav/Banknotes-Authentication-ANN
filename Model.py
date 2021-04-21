@@ -10,7 +10,7 @@ from sklearn.metrics import accuracy_score
 from matplotlib import pyplot
 from helper import *
 
-def model(X, Y, layers_dims, learning_rate = 0.01, num_iterations = 3000, print_cost=True, AF= 'relu'):#lr was 0.009
+def model(X, Y,TX,TY, layers_dims, learning_rate = 0.01, num_iterations = 3000, print_cost=True, AF= 'relu'):#lr was 0.009
     """
     Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SIGMOID.
     
@@ -28,7 +28,7 @@ def model(X, Y, layers_dims, learning_rate = 0.01, num_iterations = 3000, print_
 
     np.random.seed(1)
     costs = []                         # keep track of cost
-    
+    test_costs=[]
     # Parameters initialization. (≈ 1 line of code)
     parameters = initialize_parameters_deep(layers_dims)
     
@@ -37,10 +37,10 @@ def model(X, Y, layers_dims, learning_rate = 0.01, num_iterations = 3000, print_
 
         # Forward propagation: [LINEAR -> RELU]*(L-1) -> LINEAR -> SIGMOID.
         AL, caches = L_model_forward(X, parameters,AF)
-        
+        TL,_ = L_model_forward(TX, parameters, AF)
         # Compute cost.
-        cost = compute_cost(AL, Y)
-    
+        train_cost = compute_cost(AL, Y)
+        test_cost = compute_cost(TL,TY)
         # Backward propagation.
         grads = L_model_backward(AL, Y, caches,AF)
  
@@ -49,12 +49,17 @@ def model(X, Y, layers_dims, learning_rate = 0.01, num_iterations = 3000, print_
                 
         # Print the cost every 100 training example
         if print_cost and i % 100 == 0:
-            print ("Cost after iteration %i: %f" %(i, cost))
+            print ("After iteration %i Training Cost :  %f  Testing Cost: %f " %(i, train_cost,test_cost))
+
         if print_cost and i % 100 == 0:
-            costs.append(cost)
+            costs.append(train_cost)
+            test_costs.append(test_cost)
             
     # plot the cost
-    plt.plot(np.squeeze(costs))
+    plt.plot(np.squeeze(costs),'-b',label='Training loss')
+    plt.plot(np.squeeze(test_costs),'-r',label='Testing loss')  
+    plt.legend(loc='upper right', frameon=False)
+  
     plt.ylabel('cost')
     plt.xlabel('iterations (per hundreds)')
     plt.title("Learning rate =" + str(learning_rate))
